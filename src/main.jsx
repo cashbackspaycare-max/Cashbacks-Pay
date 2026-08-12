@@ -708,47 +708,115 @@ function Mine({ mobile, balance, balanceDetails, team, logout }) {
   );
 }
 function Team({ team, back, note }) {
+  const [details, setDetails] = useState(false);
+  const members = [
+    {
+      level: 1,
+      mobile: "98****3210",
+      id: "CP-U10421",
+      amount: 3500,
+      qty: 5,
+      joined: "02 Aug 2026",
+      active: true,
+    },
+    {
+      level: 1,
+      mobile: "91****8840",
+      id: "CP-U10488",
+      amount: 4000,
+      qty: 2,
+      joined: "04 Aug 2026",
+      active: true,
+    },
+    {
+      level: 1,
+      mobile: "87****9526",
+      id: "CP-U10516",
+      amount: 1000,
+      qty: 2,
+      joined: "06 Aug 2026",
+      active: false,
+    },
+    {
+      level: 2,
+      mobile: "70****4712",
+      id: "CP-U10811",
+      amount: 2800,
+      qty: 3,
+      joined: "07 Aug 2026",
+      active: true,
+    },
+    {
+      level: 2,
+      mobile: "99****1234",
+      id: "CP-U10842",
+      amount: 1500,
+      qty: 1,
+      joined: "09 Aug 2026",
+      active: false,
+    },
+    {
+      level: 3,
+      mobile: "88****7642",
+      id: "CP-U11002",
+      amount: 5600,
+      qty: 7,
+      joined: "10 Aug 2026",
+      active: true,
+    },
+  ];
+  if (details)
+    return <TeamDetails members={members} back={() => setDetails(false)} />;
   return (
-    <div className="subpage">
+    <div className="subpage teamPage">
       <Header title="Team Management" back={back} />
-      <div className="teamBlue">
-        <small>Total Team Earnings</small>
-        <h1>{cash(team.earnings)}</h1>
-        <div>
+      <section className="teamHero">
+        <div className="teamHeroTop">
+          <div>
+            <small>TOTAL TEAM EARNINGS</small>
+            <h1>{cash(team.earnings)}</h1>
+          </div>
+          <div className="memberCount">
+            <UsersRound />
+            <span>Team Members</span>
+            <b>{members.length}</b>
+          </div>
+        </div>
+        <div className="yesterday">
           <span>
-            Level 1<b>{cash(team.l1)}</b>
+            Yesterday's Commission<b>₹36.09</b>
           </span>
           <span>
-            Level 2<b>{cash(team.l2)}</b>
-          </span>
-          <span>
-            Level 3<b>{cash(team.l3)}</b>
+            Total Task Amount
+            <b>{cash(members.reduce((a, x) => a + x.amount, 0))}</b>
           </span>
         </div>
-      </div>
-      <section className="commission">
-        <h3>Automatic Task Commission</h3>
-        <div>
-          <span>
-            1st Level<b>0.3%</b>
-          </span>
-          <span>
-            2nd Level<b>0.2%</b>
-          </span>
-          <span>
-            3rd Level<b>0.1%</b>
-          </span>
+        <div className="todayRebate">
+          <h3>Today's Overview</h3>
+          <div>
+            <span>
+              Commission<b>{cash(team.l1 + team.l2 + team.l3)}</b>
+            </span>
+            <span>
+              Task Amount<b>{cash(8500)}</b>
+            </span>
+            <span>
+              New Members<b>2</b>
+            </span>
+          </div>
         </div>
-        <p>Credited automatically when a referred user's task succeeds.</p>
       </section>
-      <section className="invite">
-        <h3>Invite Link</h3>
+      <section className="invite teamInvite">
+        <div className="sectionHead">
+          <h3>Invite & Earn</h3>
+          <b>CP123123</b>
+        </div>
         <button onClick={() => note("Invite link copied")}>
           cashbackspay.app/invite/CP123123 <Copy />
         </button>
       </section>
-      <section className="share">
-        <h3>More ways</h3>
+      <section className="share teamShare">
+        <h3>Share invitation</h3>
         <div>
           <button>
             <Send />
@@ -759,25 +827,139 @@ function Team({ team, back, note }) {
             WhatsApp
           </button>
           <button>
+            <ReceiptText />
+            QR Code
+          </button>
+          <button>
             <Copy />
-            Copy link
+            Copy
           </button>
         </div>
       </section>
-      <section className="table">
-        {[
-          ["Level", "Commission", "Status"],
-          ["1", "0.3%", "Automatic"],
-          ["2", "0.2%", "Automatic"],
-          ["3", "0.1%", "Automatic"],
-        ].map((x) => (
+      <section className="rewardCard">
+        <div className="sectionHead">
           <div>
-            {x.map((y) => (
-              <span>{y}</span>
-            ))}
+            <small>AUTOMATIC COMMISSION</small>
+            <h3>Purchase Reward</h3>
           </div>
+          <button onClick={() => setDetails(true)}>
+            Details <ChevronRight />
+          </button>
+        </div>
+        <div className="rewardTable">
+          <div className="tableHeader">
+            <b>Level</b>
+            <b>Rate</b>
+            <b>Members</b>
+            <b>Active</b>
+          </div>
+          {[1, 2, 3].map((l) => {
+            const list = members.filter((x) => x.level === l);
+            return (
+              <div>
+                <span>L{l}</span>
+                <strong>{[0.3, 0.2, 0.1][l - 1]}%</strong>
+                <span>{list.length}</span>
+                <span>{list.filter((x) => x.active).length}</span>
+              </div>
+            );
+          })}
+        </div>
+        <p>Commission is credited automatically after successful team tasks.</p>
+      </section>
+      <section className="levelCards">
+        {[1, 2, 3].map((l) => (
+          <button onClick={() => setDetails(true)}>
+            <i>L{l}</i>
+            <span>
+              {members.filter((x) => x.level === l).length} Members
+              <small>{[0.3, 0.2, 0.1][l - 1]}% Commission</small>
+            </span>
+            <ChevronRight />
+          </button>
         ))}
       </section>
+    </div>
+  );
+}
+function TeamDetails({ members, back }) {
+  const [level, setLevel] = useState(1),
+    [query, setQuery] = useState(""),
+    rate = { 1: 0.003, 2: 0.002, 3: 0.001 },
+    shown = members.filter(
+      (x) =>
+        x.level === level &&
+        (x.mobile + x.id).toLowerCase().includes(query.toLowerCase()),
+    ),
+    amount = shown.reduce((a, x) => a + x.amount, 0);
+  return (
+    <div className="teamDetailPage">
+      <Header title="Team Task Details" back={back} />
+      <div className="detailLevelTabs">
+        {[1, 2, 3].map((x) => (
+          <button
+            className={level === x ? "on" : ""}
+            onClick={() => setLevel(x)}
+          >
+            Level {x}
+            <small>{[0.3, 0.2, 0.1][x - 1]}%</small>
+          </button>
+        ))}
+      </div>
+      <div className="memberSearch">
+        <Search />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search user ID or mobile"
+        />
+      </div>
+      <section className="levelSummary">
+        <div>
+          <span>Members</span>
+          <b>{shown.length}</b>
+        </div>
+        <div>
+          <span>Task Amount</span>
+          <b>{cash(amount)}</b>
+        </div>
+        <div>
+          <span>Your Bonus</span>
+          <b>{cash(amount * rate[level])}</b>
+        </div>
+      </section>
+      <div className="memberList">
+        {shown.map((x) => (
+          <article>
+            <div className="memberAvatar">{x.mobile.slice(0, 2)}</div>
+            <div className="memberIdentity">
+              <b>{x.mobile}</b>
+              <span>
+                {x.id} · Joined {x.joined}
+              </span>
+              <small className={x.active ? "online" : "offline"}>
+                {x.active ? "● Active today" : "● Inactive"}
+              </small>
+            </div>
+            <div className="memberBonus">
+              <strong>{cash(x.amount * rate[level])}</strong>
+              <span>{x.qty} tasks</span>
+            </div>
+            <div className="memberStats">
+              <span>
+                Successful Task Amount<b>{cash(x.amount)}</b>
+              </span>
+              <span>
+                Commission Rate<b>{rate[level] * 100}%</b>
+              </span>
+              <span>
+                Bonus Earned<b>{cash(x.amount * rate[level])}</b>
+              </span>
+            </div>
+          </article>
+        ))}
+        {!shown.length && <Empty />}
+      </div>
     </div>
   );
 }
