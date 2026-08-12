@@ -1,12 +1,621 @@
-import React,{useState}from'react';import{createRoot}from'react-dom/client';import{Home,WalletCards,UserRound,Copy,RefreshCw,ChevronRight,ChevronLeft,UsersRound,ShieldCheck,Headphones,LockKeyhole,Gift,Send,Share2,CheckCircle2,Clock3,XCircle,LogOut,PlayCircle,PlusCircle,TrendingUp,ReceiptText}from'lucide-react';import'./style.css';
-const seed=[101,110,120,125,139,140,143].map((x,i)=>({id:`CP-${10640+i}`,amount:x,qty:[2,33,3,1,1,2,5][i],reward:+(x*.03).toFixed(2),status:'OPEN'}));const cash=n=>'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}),tabs=['Unfinished','Bank lock','Locked','Success','Fail'];
-function App(){const[login,setLogin]=useState(false),[admin,setAdmin]=useState(false),[tab,setTab]=useState('home'),[orders,setOrders]=useState(seed),[records,setRecords]=useState([]),[level,setLevel]=useState('L1'),[recordType,setRecordType]=useState(null),[toast,setToast]=useState(''),[balance,setBalance]=useState(1508.72),[team,setTeam]=useState({earnings:81.01,l1:0,l2:0,l3:0}),[mobile,setMobile]=useState('');const note=x=>{setToast(x);setTimeout(()=>setToast(''),1700)},receive=o=>{setRecords([{...o,status:'UNFINISHED',time:new Date().toLocaleString('en-IN')},...records]);setOrders(orders.filter(x=>x.id!==o.id));note('Order received successfully')},complete=id=>{const r=records.find(x=>x.id===id);if(!r||r.status==='SUCCESS')return;setRecords(records.map(x=>x.id===id?{...x,status:'SUCCESS'}:x));const a=r.amount*.003,b=r.amount*.002,c=r.amount*.001;setTeam(t=>({...t,earnings:t.earnings+a+b+c,l1:t.l1+a,l2:t.l2+b,l3:t.l3+c}));setBalance(v=>v+r.reward);note('Task complete • Commission credited')};if(!login)return <Login mobile={mobile} setMobile={setMobile} enter={a=>{setAdmin(a);setLogin(true);setTab(a?'admin':'home')}}/>;return <div className="app"><main>{tab==='home'&&<Dashboard more={()=>setRecordType('Buy CP record')}/>} {tab==='buy'&&<Buy orders={orders} receive={receive} level={level} setLevel={setLevel} records={()=>setRecordType('Buy CP record')}/>} {tab==='sell'&&<Sell records={()=>setRecordType('Sell CP record')}/>} {tab==='mine'&&<Mine mobile={mobile} balance={balance} team={()=>setTab('team')} logout={()=>setLogin(false)}/>} {tab==='team'&&<Team team={team} back={()=>setTab('mine')} note={note}/>} {tab==='admin'&&<Admin records={records} complete={complete} logout={()=>setLogin(false)}/>} {recordType&&<Records title={recordType} data={records} back={()=>setRecordType(null)}/>}</main>{!recordType&&!['team','admin'].includes(tab)&&<nav><Nav icon={Home} text="Home" active={tab==='home'} go={()=>setTab('home')}/><Nav coin text="Buy CP" active={tab==='buy'} go={()=>setTab('buy')}/><Nav icon={WalletCards} text="Sell CP" active={tab==='sell'} go={()=>setTab('sell')}/><Nav icon={UserRound} text="Mine" active={tab==='mine'} go={()=>setTab('mine')}/></nav>}{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</div>}
-function Login({mobile,setMobile,enter}){return <div className="login"><div className="loginGlow"><div className="cpLogo">CP</div><h1>CashbacksPay</h1><p>Smart tasks. Instant rewards.</p></div><section><h2>Welcome Back</h2><p>Sign in to continue</p><label>Mobile number</label><div className="phone"><span>+91</span><input maxLength="10" value={mobile} onChange={e=>setMobile(e.target.value.replace(/\D/g,''))} placeholder="Enter mobile number"/></div><label>Password</label><input className="input" type="password" placeholder="Enter your password"/><button className="primary" onClick={()=>enter(mobile==='9999999999')}>Secure Login</button><button className="link">Create new account</button><div className="demo">Admin: 9999999999 · User: any number</div></section></div>}
-function Dashboard({more}){return <><div className="blueHead"><div className="topline"><div className="miniLogo">CP</div><div><b>CashbacksPay</b><small>Welcome back, Partner</small></div><button><Gift/></button></div><div className="campaign"><span>DAILY</span><b>REWARD TASKS</b><p>Complete more • Earn more</p><i>UP TO 3% REWARD</i><div className="coins">₹</div></div></div><div className="page homePage"><div className="ad"><div><small>SECURE DIGITAL PAYMENTS</small><b>Fast Task Settlement</b><span>Verified • Simple • Rewarding</span></div><ShieldCheck/></div><section className="overview"><Stat icon={ReceiptText} t="Buy quantity" v="12"/><Stat icon={WalletCards} t="Buy Amount" v="₹1,288.00"/><Stat icon={RefreshCw} t="Sell today" v="₹420.00"/><Stat icon={TrendingUp} t="Total revenue" v="₹81.01"/><button onClick={more}>More <ChevronRight/></button></section><h2 className="sectionTitle">Tutorial</h2><section className="tutorial"><div><b>Purchase Introduction</b><span>Learn how to receive and finish orders</span><button><PlayCircle/> Watch video</button></div><div className="tutorialArt"><ReceiptText/></div></section></div></>}
-function Stat({icon:I,t,v}){return <div><span><I/>{t}</span><b>{v}</b></div>}function Buy({orders,receive,level,setLevel,records}){return <><div className="buyHead"><div className="levels">{['L1','L2','L3','L4','L5','L6','L7'].map(x=><button className={level===x?'on':''} onClick={()=>setLevel(x)}>{x}</button>)}<button onClick={records}><ReceiptText/></button></div><div className="filters"><button>From low to high⌄</button><button><RefreshCw/> Refresh</button></div></div><div className="orderFeed">{orders.map(o=><article><div><h3>Order amount: {cash(o.amount)}</h3><p>Order quantity: {o.qty}</p><p>Reward: <b>{cash(o.reward)}</b> <em>+ bonus</em></p></div><div><button onClick={()=>receive(o)}>Receive</button><p>Final: <b>{cash(o.amount+o.reward)} CP</b></p></div></article>)}</div></>}
-function Sell({records}){return <div className="page sellPage"><section className="today"><h3>Today's Overview</h3><span>Amount of receipt:</span><b>₹0.00</b><button onClick={records}>Record</button></section><div className="sellAd"><b>Earn more with verified tasks</b><span>Faster matching for active partners</span></div><h2 className="sectionTitle">Wallet Information</h2><section className="emptyWallet"><WalletCards/><b>There is currently no wallet</b><span>Add your receiving wallet to start selling</span></section><p className="rules">Acceleration rules ⓘ</p><div className="sellBtns"><button><PlusCircle/> Add Wallet</button><button><TrendingUp/> Sell Faster<small>Available times: 0</small></button></div></div>}
-function Mine({mobile,balance,team,logout}){return <div className="page mine"><div className="identity"><div className="avatar">CP</div><div><b>MOBILE: +91 {mobile||'98XXXXXX10'}</b><button>Invite Code: CP123123 <Copy/></button></div></div><section className="balance"><span>Current Balance</span><b>{cash(balance)}</b><ChevronRight/></section><section className="teamBanner" onClick={team}><div><small>MY TEAM</small><b>3-LEVEL Commission</b><span>View earnings →</span></div><UsersRound/></section><div className="mineMenu"><Menu icon={Gift} text="Newbie Rewards"/><Menu icon={WalletCards} text="Payment Accounts"/><Menu icon={UsersRound} text="Team Management" click={team}/><Menu icon={Headphones} text="Online Service"/><Menu icon={LockKeyhole} text="Account Security"/><Menu icon={Send} text="Telegram Channel"/></div><button className="logout" onClick={logout}><LogOut/> Logout</button></div>}
-function Team({team,back,note}){return <div className="subpage"><Header title="Team Management" back={back}/><div className="teamBlue"><small>Total Team Earnings</small><h1>{cash(team.earnings)}</h1><div><span>Level 1<b>{cash(team.l1)}</b></span><span>Level 2<b>{cash(team.l2)}</b></span><span>Level 3<b>{cash(team.l3)}</b></span></div></div><section className="commission"><h3>Automatic Task Commission</h3><div><span>1st Level<b>0.3%</b></span><span>2nd Level<b>0.2%</b></span><span>3rd Level<b>0.1%</b></span></div><p>Credited automatically when a referred user's task succeeds.</p></section><section className="invite"><h3>Invite Link</h3><button onClick={()=>note('Invite link copied')}>cashbackspay.app/invite/CP123123 <Copy/></button></section><section className="share"><h3>More ways</h3><div><button><Send/>Telegram</button><button><Share2/>WhatsApp</button><button><Copy/>Copy link</button></div></section><section className="table">{[['Level','Commission','Status'],['1','0.3%','Automatic'],['2','0.2%','Automatic'],['3','0.1%','Automatic']].map(x=><div>{x.map(y=><span>{y}</span>)}</div>)}</section></div>}
-function Records({title,data,back}){const[filter,setFilter]=useState('Unfinished'),key=filter==='Unfinished'?'UNFINISHED':filter==='Success'?'SUCCESS':filter==='Fail'?'FAILED':filter.toUpperCase(),shown=data.filter(x=>x.status===key);return <div className="overlayPage"><Header title={title} back={back}/><div className="recordTabs">{tabs.map(x=><button className={filter===x?'on':''} onClick={()=>setFilter(x)}>{x}</button>)}</div>{shown.length?<div className="recordList">{shown.map(x=><article><b>{x.id}</b><span>{cash(x.amount)}</span><small>{x.time}</small><Status s={x.status}/></article>)}</div>:<Empty/>}</div>}
-function Admin({records,complete,logout}){return <div className="subpage admin"><div className="adminTitle"><div><small>CashbacksPay</small><h2>Task Control</h2></div><button onClick={logout}><LogOut/></button></div><div className="adminStats"><span>Active Orders<b>{records.filter(x=>x.status==='UNFINISHED').length}</b></span><span>Completed<b>{records.filter(x=>x.status==='SUCCESS').length}</b></span></div><h3>Task Queue</h3>{records.length?records.map(x=><article><div><b>{x.id}</b><small>{x.time}</small><span>{cash(x.amount)}</span></div><Status s={x.status}/>{x.status==='UNFINISHED'&&<button onClick={()=>complete(x.id)}>Mark task successful</button>}</article>):<Empty/>}<p className="adminNote">Successful task automatically distributes 0.3%, 0.2% and 0.1% referral commission. No separate commission approval.</p></div>}
-function Header({title,back}){return <header className="header"><button onClick={back}><ChevronLeft/></button><b>{title}</b><i/></header>}function Empty(){return <div className="empty"><div><ReceiptText/></div><b>There are currently no orders</b><span>Your matching orders will appear here</span></div>}function Status({s}){return <span className={'status '+s.toLowerCase()}>{s==='SUCCESS'?<CheckCircle2/>:s==='FAILED'?<XCircle/>:<Clock3/>}{s}</span>}function Menu({icon:I,text,click}){return <button onClick={click}><I/><span>{text}</span><ChevronRight/></button>}function Nav({icon:I,coin,text,active,go}){return <button className={active?'active':''} onClick={go}>{coin?<i>CP</i>:<I/>}<span>{text}</span></button>}createRoot(document.getElementById('root')).render(<App/>);
+import React, { useState } from "react";
+import { createRoot } from "react-dom/client";
+import {
+  Home,
+  WalletCards,
+  UserRound,
+  Copy,
+  RefreshCw,
+  ChevronRight,
+  ChevronLeft,
+  UsersRound,
+  ShieldCheck,
+  Headphones,
+  LockKeyhole,
+  Gift,
+  Send,
+  Share2,
+  CheckCircle2,
+  Clock3,
+  XCircle,
+  LogOut,
+  PlayCircle,
+  PlusCircle,
+  TrendingUp,
+  ReceiptText,
+} from "lucide-react";
+import "./style.css";
+const seed = [101, 110, 120, 125, 139, 140, 143].map((x, i) => ({
+  id: `CP-${10640 + i}`,
+  amount: x,
+  qty: [2, 33, 3, 1, 1, 2, 5][i],
+  reward: +(x * 0.03).toFixed(2),
+  status: "OPEN",
+}));
+const cash = (n) =>
+    "₹" +
+    Number(n).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }),
+  tabs = ["Unfinished", "Bank lock", "Locked", "Success", "Fail"];
+function App() {
+  const [login, setLogin] = useState(false),
+    [admin, setAdmin] = useState(false),
+    [tab, setTab] = useState("home"),
+    [orders, setOrders] = useState(seed),
+    [records, setRecords] = useState([]),
+    [level, setLevel] = useState("L1"),
+    [recordType, setRecordType] = useState(null),
+    [toast, setToast] = useState(""),
+    [balance, setBalance] = useState(1508.72),
+    [team, setTeam] = useState({ earnings: 81.01, l1: 0, l2: 0, l3: 0 }),
+    [mobile, setMobile] = useState("");
+  const note = (x) => {
+      setToast(x);
+      setTimeout(() => setToast(""), 1700);
+    },
+    receive = (o) => {
+      setRecords([
+        {
+          ...o,
+          status: "UNFINISHED",
+          time: new Date().toLocaleString("en-IN"),
+        },
+        ...records,
+      ]);
+      setOrders(orders.filter((x) => x.id !== o.id));
+      note("Order received successfully");
+    },
+    complete = (id) => {
+      const r = records.find((x) => x.id === id);
+      if (!r || r.status === "SUCCESS") return;
+      setRecords(
+        records.map((x) => (x.id === id ? { ...x, status: "SUCCESS" } : x)),
+      );
+      const a = r.amount * 0.003,
+        b = r.amount * 0.002,
+        c = r.amount * 0.001;
+      setTeam((t) => ({
+        ...t,
+        earnings: t.earnings + a + b + c,
+        l1: t.l1 + a,
+        l2: t.l2 + b,
+        l3: t.l3 + c,
+      }));
+      setBalance((v) => v + r.reward);
+      note("Task complete • Commission credited");
+    };
+  if (!login)
+    return (
+      <Login
+        mobile={mobile}
+        setMobile={setMobile}
+        enter={(a) => {
+          setAdmin(a);
+          setLogin(true);
+          setTab(a ? "admin" : "home");
+        }}
+      />
+    );
+  return (
+    <div className="app">
+      <main>
+        {tab === "home" && (
+          <Dashboard more={() => setRecordType("Buy CP record")} />
+        )}{" "}
+        {tab === "buy" && (
+          <Buy
+            orders={orders}
+            receive={receive}
+            level={level}
+            setLevel={setLevel}
+            records={() => setRecordType("Buy CP record")}
+          />
+        )}{" "}
+        {tab === "sell" && (
+          <Sell records={() => setRecordType("Sell CP record")} />
+        )}{" "}
+        {tab === "mine" && (
+          <Mine
+            mobile={mobile}
+            balance={balance}
+            team={() => setTab("team")}
+            logout={() => setLogin(false)}
+          />
+        )}{" "}
+        {tab === "team" && (
+          <Team team={team} back={() => setTab("mine")} note={note} />
+        )}{" "}
+        {tab === "admin" && (
+          <Admin
+            records={records}
+            complete={complete}
+            logout={() => setLogin(false)}
+          />
+        )}{" "}
+        {recordType && (
+          <Records
+            title={recordType}
+            data={records}
+            back={() => setRecordType(null)}
+          />
+        )}
+      </main>
+      {!['team', 'admin'].includes(tab) && (
+        <nav>
+          <Nav
+            icon={Home}
+            text="Home"
+            active={tab === "home" && !recordType}
+            go={() => { setRecordType(null); setTab("home"); }}
+          />
+          <Nav
+            coin
+            text="Buy CP"
+            active={tab === "buy" || recordType === "Buy CP record"}
+            go={() => { setRecordType(null); setTab("buy"); }}
+          />
+          <Nav
+            icon={WalletCards}
+            text="Sell CP"
+            active={tab === "sell" || recordType === "Sell CP record"}
+            go={() => { setRecordType(null); setTab("sell"); }}
+          />
+          <Nav
+            icon={UserRound}
+            text="Mine"
+            active={tab === "mine" && !recordType}
+            go={() => { setRecordType(null); setTab("mine"); }}
+          />
+        </nav>
+      )}
+      {toast && (
+        <div className="toast">
+          <CheckCircle2 />
+          {toast}
+        </div>
+      )}
+    </div>
+  );
+}
+function Login({ mobile, setMobile, enter }) {
+  return (
+    <div className="login">
+      <div className="loginGlow">
+        <div className="cpLogo">CP</div>
+        <h1>CashbacksPay</h1>
+        <p>Smart tasks. Instant rewards.</p>
+      </div>
+      <section>
+        <h2>Welcome Back</h2>
+        <p>Sign in to continue</p>
+        <label>Mobile number</label>
+        <div className="phone">
+          <span>+91</span>
+          <input
+            maxLength="10"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+            placeholder="Enter mobile number"
+          />
+        </div>
+        <label>Password</label>
+        <input
+          className="input"
+          type="password"
+          placeholder="Enter your password"
+        />
+        <button
+          className="primary"
+          onClick={() => enter(mobile === "9999999999")}
+        >
+          Secure Login
+        </button>
+        <button className="link">Create new account</button>
+        <div className="demo">Admin: 9999999999 · User: any number</div>
+      </section>
+    </div>
+  );
+}
+function Dashboard({ more }) {
+  return (
+    <>
+      <div className="blueHead">
+        <div className="topline">
+          <div className="miniLogo">CP</div>
+          <div>
+            <b>CashbacksPay</b>
+            <small>Welcome back, Partner</small>
+          </div>
+          <button>
+            <Gift />
+          </button>
+        </div>
+        <div className="campaign">
+          <span>DAILY</span>
+          <b>REWARD TASKS</b>
+          <p>Complete more • Earn more</p>
+          <i>UP TO 3% REWARD</i>
+          <div className="coins">₹</div>
+        </div>
+      </div>
+      <div className="page homePage">
+        <div className="ad">
+          <div>
+            <small>SECURE DIGITAL PAYMENTS</small>
+            <b>Fast Task Settlement</b>
+            <span>Verified • Simple • Rewarding</span>
+          </div>
+          <ShieldCheck />
+        </div>
+        <section className="overview">
+          <Stat icon={ReceiptText} t="Buy quantity" v="12" />
+          <Stat icon={WalletCards} t="Buy Amount" v="₹1,288.00" />
+          <Stat icon={RefreshCw} t="Sell today" v="₹420.00" />
+          <Stat icon={TrendingUp} t="Total revenue" v="₹81.01" />
+          <button onClick={more}>
+            More <ChevronRight />
+          </button>
+        </section>
+        <h2 className="sectionTitle">Tutorial</h2>
+        <section className="tutorial">
+          <div>
+            <b>Purchase Introduction</b>
+            <span>Learn how to receive and finish orders</span>
+            <button>
+              <PlayCircle /> Watch video
+            </button>
+          </div>
+          <div className="tutorialArt">
+            <ReceiptText />
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
+function Stat({ icon: I, t, v }) {
+  return (
+    <div>
+      <span>
+        <I />
+        {t}
+      </span>
+      <b>{v}</b>
+    </div>
+  );
+}
+function Buy({ orders, receive, level, setLevel, records }) {
+  return (
+    <>
+      <div className="buyHead">
+        <div className="levels">
+          {["L1", "L2", "L3", "L4", "L5", "L6", "L7"].map((x) => (
+            <button
+              className={level === x ? "on" : ""}
+              onClick={() => setLevel(x)}
+            >
+              {x}
+            </button>
+          ))}
+          <button onClick={records}>
+            <ReceiptText />
+          </button>
+        </div>
+        <div className="filters">
+          <button>From low to high⌄</button>
+          <button>
+            <RefreshCw /> Refresh
+          </button>
+        </div>
+      </div>
+      <div className="orderFeed">
+        {orders.map((o) => (
+          <article>
+            <div>
+              <h3>Order amount: {cash(o.amount)}</h3>
+              <p>Order quantity: {o.qty}</p>
+              <p>
+                Reward: <b>{cash(o.reward)}</b> <em>+ bonus</em>
+              </p>
+            </div>
+            <div>
+              <button onClick={() => receive(o)}>Receive</button>
+              <p>
+                Final: <b>{cash(o.amount + o.reward)} CP</b>
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}
+function Sell({ records }) {
+  return (
+    <div className="page sellPage">
+      <section className="today">
+        <h3>Today's Overview</h3>
+        <span>Amount of receipt:</span>
+        <b>₹0.00</b>
+        <button onClick={records}>Record</button>
+      </section>
+      <div className="sellAd">
+        <b>Earn more with verified tasks</b>
+        <span>Faster matching for active partners</span>
+      </div>
+      <h2 className="sectionTitle">Wallet Information</h2>
+      <section className="emptyWallet">
+        <WalletCards />
+        <b>There is currently no wallet</b>
+        <span>Add your receiving wallet to start selling</span>
+      </section>
+      <p className="rules">Acceleration rules ⓘ</p>
+      <div className="sellBtns">
+        <button>
+          <PlusCircle /> Add Wallet
+        </button>
+        <button>
+          <TrendingUp /> Sell Faster<small>Available times: 0</small>
+        </button>
+      </div>
+    </div>
+  );
+}
+function Mine({ mobile, balance, team, logout }) {
+  return (
+    <div className="page mine">
+      <div className="identity">
+        <div className="avatar">CP</div>
+        <div>
+          <b>MOBILE: +91 {mobile || "98XXXXXX10"}</b>
+          <button>
+            Invite Code: CP123123 <Copy />
+          </button>
+        </div>
+      </div>
+      <section className="balance">
+        <span>Current Balance</span>
+        <b>{cash(balance)}</b>
+        <ChevronRight />
+      </section>
+      <section className="teamBanner" onClick={team}>
+        <div>
+          <small>MY TEAM</small>
+          <b>3-LEVEL Commission</b>
+          <span>View earnings →</span>
+        </div>
+        <UsersRound />
+      </section>
+      <div className="mineMenu">
+        <Menu icon={Gift} text="Newbie Rewards" />
+        <Menu icon={WalletCards} text="Payment Accounts" />
+        <Menu icon={UsersRound} text="Team Management" click={team} />
+        <Menu icon={Headphones} text="Online Service" />
+        <Menu icon={LockKeyhole} text="Account Security" />
+        <Menu icon={Send} text="Telegram Channel" />
+      </div>
+      <button className="logout" onClick={logout}>
+        <LogOut /> Logout
+      </button>
+    </div>
+  );
+}
+function Team({ team, back, note }) {
+  return (
+    <div className="subpage">
+      <Header title="Team Management" back={back} />
+      <div className="teamBlue">
+        <small>Total Team Earnings</small>
+        <h1>{cash(team.earnings)}</h1>
+        <div>
+          <span>
+            Level 1<b>{cash(team.l1)}</b>
+          </span>
+          <span>
+            Level 2<b>{cash(team.l2)}</b>
+          </span>
+          <span>
+            Level 3<b>{cash(team.l3)}</b>
+          </span>
+        </div>
+      </div>
+      <section className="commission">
+        <h3>Automatic Task Commission</h3>
+        <div>
+          <span>
+            1st Level<b>0.3%</b>
+          </span>
+          <span>
+            2nd Level<b>0.2%</b>
+          </span>
+          <span>
+            3rd Level<b>0.1%</b>
+          </span>
+        </div>
+        <p>Credited automatically when a referred user's task succeeds.</p>
+      </section>
+      <section className="invite">
+        <h3>Invite Link</h3>
+        <button onClick={() => note("Invite link copied")}>
+          cashbackspay.app/invite/CP123123 <Copy />
+        </button>
+      </section>
+      <section className="share">
+        <h3>More ways</h3>
+        <div>
+          <button>
+            <Send />
+            Telegram
+          </button>
+          <button>
+            <Share2 />
+            WhatsApp
+          </button>
+          <button>
+            <Copy />
+            Copy link
+          </button>
+        </div>
+      </section>
+      <section className="table">
+        {[
+          ["Level", "Commission", "Status"],
+          ["1", "0.3%", "Automatic"],
+          ["2", "0.2%", "Automatic"],
+          ["3", "0.1%", "Automatic"],
+        ].map((x) => (
+          <div>
+            {x.map((y) => (
+              <span>{y}</span>
+            ))}
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
+function Records({ title, data, back }) {
+  const [filter, setFilter] = useState("Unfinished"),
+    key =
+      filter === "Unfinished"
+        ? "UNFINISHED"
+        : filter === "Success"
+          ? "SUCCESS"
+          : filter === "Fail"
+            ? "FAILED"
+            : filter.toUpperCase(),
+    shown = data.filter((x) => x.status === key);
+  return (
+    <div className="overlayPage">
+      <Header title={title} back={back} />
+      <div className="recordTabs">
+        {tabs.map((x) => (
+          <button
+            className={filter === x ? "on" : ""}
+            onClick={() => setFilter(x)}
+          >
+            {x}
+          </button>
+        ))}
+      </div>
+      {shown.length ? (
+        <div className="recordList">
+          {shown.map((x) => (
+            <article>
+              <b>{x.id}</b>
+              <span>{cash(x.amount)}</span>
+              <small>{x.time}</small>
+              <Status s={x.status} />
+            </article>
+          ))}
+        </div>
+      ) : (
+        <Empty />
+      )}
+    </div>
+  );
+}
+function Admin({ records, complete, logout }) {
+  return (
+    <div className="subpage admin">
+      <div className="adminTitle">
+        <div>
+          <small>CashbacksPay</small>
+          <h2>Task Control</h2>
+        </div>
+        <button onClick={logout}>
+          <LogOut />
+        </button>
+      </div>
+      <div className="adminStats">
+        <span>
+          Active Orders
+          <b>{records.filter((x) => x.status === "UNFINISHED").length}</b>
+        </span>
+        <span>
+          Completed<b>{records.filter((x) => x.status === "SUCCESS").length}</b>
+        </span>
+      </div>
+      <h3>Task Queue</h3>
+      {records.length ? (
+        records.map((x) => (
+          <article>
+            <div>
+              <b>{x.id}</b>
+              <small>{x.time}</small>
+              <span>{cash(x.amount)}</span>
+            </div>
+            <Status s={x.status} />
+            {x.status === "UNFINISHED" && (
+              <button onClick={() => complete(x.id)}>
+                Mark task successful
+              </button>
+            )}
+          </article>
+        ))
+      ) : (
+        <Empty />
+      )}
+      <p className="adminNote">
+        Successful task automatically distributes 0.3%, 0.2% and 0.1% referral
+        commission. No separate commission approval.
+      </p>
+    </div>
+  );
+}
+function Header({ title, back }) {
+  return (
+    <header className="header">
+      <button onClick={back}>
+        <ChevronLeft />
+      </button>
+      <b>{title}</b>
+      <i />
+    </header>
+  );
+}
+function Empty() {
+  return (
+    <div className="empty">
+      <div>
+        <ReceiptText />
+      </div>
+      <b>There are currently no orders</b>
+      <span>Your matching orders will appear here</span>
+    </div>
+  );
+}
+function Status({ s }) {
+  return (
+    <span className={"status " + s.toLowerCase()}>
+      {s === "SUCCESS" ? (
+        <CheckCircle2 />
+      ) : s === "FAILED" ? (
+        <XCircle />
+      ) : (
+        <Clock3 />
+      )}
+      {s}
+    </span>
+  );
+}
+function Menu({ icon: I, text, click }) {
+  return (
+    <button onClick={click}>
+      <I />
+      <span>{text}</span>
+      <ChevronRight />
+    </button>
+  );
+}
+function Nav({ icon: I, coin, text, active, go }) {
+  return (
+    <button className={active ? "active" : ""} onClick={go}>
+      {coin ? <i>CP</i> : <I />}
+      <span>{text}</span>
+    </button>
+  );
+}
+createRoot(document.getElementById("root")).render(<App />);
