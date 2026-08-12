@@ -48,6 +48,11 @@ const cash = (n) =>
       maximumFractionDigits: 2,
     }),
   tabs = ["Unfinished", "Bank lock", "Locked", "Success", "Fail"];
+const copyText = (value, done) => {
+  if (navigator.clipboard?.writeText)
+    navigator.clipboard.writeText(value).then(done).catch(done);
+  else done();
+};
 function App() {
   const [login, setLogin] = useState(false),
     [authScreen, setAuthScreen] = useState("onboarding"),
@@ -172,6 +177,7 @@ function App() {
             balance={balance}
             balanceDetails={() => setRecordType("Balance Details")}
             team={() => setTab("team")}
+            note={note}
             logout={() => setLogin(false)}
           />
         )}{" "}
@@ -591,7 +597,77 @@ function Stat({ icon: I, t, v }) {
     </div>
   );
 }
+const buyWallets = [
+    ["PhonePe", "पे", "phonepe"],
+    ["Freecharge", "F", "freecharge"],
+    ["MobiKwik", "M", "mobikwik"],
+    ["Paytm", "pay", "paytm"],
+    ["MyJio", "Jio", "jio"],
+    ["MoneyView", "MV", "moneyview"],
+  ],
+  sellWallets = [
+    ["PhonePe", "पे", "phonepe"],
+    ["MobiKwik", "M", "mobikwik"],
+    ["Paytm", "pay", "paytm"],
+    ["MyJio", "Jio", "jio"],
+    ["MoneyView", "MV", "moneyview"],
+    ["BharatPe Business", "BP", "bharatpe"],
+    ["Paytm Business", "PB", "paytmbiz"],
+  ];
 function Buy({ orders, receive, level, setLevel, records }) {
+  const [order, setOrder] = useState(null),
+    [wallet, setWallet] = useState(null),
+    [phase, setPhase] = useState("list"),
+    [utr, setUtr] = useState(""),
+    [receipt, setReceipt] = useState("");
+  const start = (o) => {
+      setOrder(o);
+      setWallet(null);
+      setPhase("wallet");
+    },
+    confirm = () => {
+      if (wallet) setPhase("pay");
+    },
+    submit = () => {
+      if (utr.length !== 12 || !receipt) return;
+      receive({ ...order, wallet: wallet[0], utr, receipt });
+      setPhase("done");
+    };
+  if (phase === "wallet")
+    return (
+      <WalletChooser
+        title="Choose a wallet"
+        wallets={buyWallets}
+        selected={wallet}
+        select={setWallet}
+        back={() => setPhase("list")}
+        confirm={confirm}
+      />
+    );
+  if (phase === "pay")
+    return (
+      <PaymentScreen
+        order={order}
+        wallet={wallet}
+        utr={utr}
+        setUtr={setUtr}
+        receipt={receipt}
+        setReceipt={setReceipt}
+        back={() => setPhase("wallet")}
+        submit={submit}
+      />
+    );
+  if (phase === "done")
+    return (
+      <FlowDone
+        title="Verification Pending"
+        text="Your UTR and receipt were submitted for manual verification."
+        action={() => {
+          setPhase("list");
+          setOrder(null);
+        }}
+      />
+    );
   return (
     <>
       <div className="buyHead">
@@ -626,7 +702,7 @@ function Buy({ orders, receive, level, setLevel, records }) {
               </p>
             </div>
             <div>
-              <button onClick={() => receive(o)}>Receive</button>
+              <button onClick={() => start(o)}>Receive</button>
               <p>
                 Final: <b>{cash(o.amount + o.reward)} CP</b>
               </p>
@@ -638,6 +714,27 @@ function Buy({ orders, receive, level, setLevel, records }) {
   );
 }
 function Sell({ records }) {
+  const [phase, setPhase] = useState("home"),
+    [wallet, setWallet] = useState(null);
+  if (phase === "wallet")
+    return (
+      <WalletChooser
+        title="Choose receiving wallet"
+        wallets={sellWallets}
+        selected={wallet}
+        select={setWallet}
+        back={() => setPhase("home")}
+        confirm={() => wallet && setPhase("started")}
+      />
+    );
+  if (phase === "started")
+    return (
+      <FlowDone
+        title="Selling Started"
+        text={`Your CP is available for matching via ${wallet[0]}. Status: Waiting for Order.`}
+        action={() => setPhase("home")}
+      />
+    );
   return (
     <div className="page sellPage">
       <section className="today">
@@ -658,7 +755,7 @@ function Sell({ records }) {
       </section>
       <p className="rules">Acceleration rules ⓘ</p>
       <div className="sellBtns">
-        <button>
+        <button onClick={() => setPhase("wallet")}>
           <PlusCircle /> Add Wallet
         </button>
         <button>
@@ -668,15 +765,129 @@ function Sell({ records }) {
     </div>
   );
 }
-function Mine({ mobile, balance, balanceDetails, team, logout }) {
+function WalletChooser({ title, wallets, selected, select, back, confirm }) {
+  return (
+    <div className="flowPage">
+      <Header title={title} back={back} />
+      <p className="flowHint">Select one app to continue securely</p>
+      <div className="walletList">
+        {wallets.map((w) => (
+          <button
+            className={selected?.[0] === w[0] ? "selected" : ""}
+            onClick={() => select(w)}
+          >
+            <WalletLogo wallet={w} />
+            <span>{w[0]}</span>
+            <i>{selected?.[0] === w[0] && <CheckCircle2 />}</i>
+          </button>
+        ))}
+      </div>
+      <button className="flowConfirm" disabled={!selected} onClick={confirm}>
+        Confirm Wallet
+      </button>
+    </div>
+  );
+}
+function WalletLogo({ wallet: w }) {
+  return <div className={"walletLogo " + w[2]}>{w[1]}</div>;
+}
+function PaymentScreen({
+  order,
+  wallet,
+  utr,
+  setUtr,
+  receipt,
+  setReceipt,
+  back,
+  submit,
+}) {
+  return (
+    <div className="flowPage paymentPage">
+      <Header title="Complete Payment" back={back} />
+      <div className="countdown">
+        <Clock3 /> Order reserved for you <b>09:42</b>
+      </div>
+      <section className="payHero">
+        <WalletLogo wallet={wallet} />
+        <small>PAY USING {wallet[0].toUpperCase()}</small>
+        <h1>{cash(order.amount)}</h1>
+        <span>Order ID: {order.id}</span>
+      </section>
+      <section className="receiverCard">
+        <small>VERIFY RECEIVER BEFORE PAYMENT</small>
+        <h3>CashbacksPay Merchant</h3>
+        <p>Banking Name</p>
+        <div className="safeNote">
+          <ShieldCheck /> Check this exact banking name inside {wallet[0]}{" "}
+          before paying.
+        </div>
+        <button
+          className="payAppButton"
+          onClick={() =>
+            alert(
+              `${wallet[0]} direct opening will be connected in the next phase.`,
+            )
+          }
+        >
+          <WalletLogo wallet={wallet} /> Pay {cash(order.amount)} with{" "}
+          {wallet[0]}
+        </button>
+      </section>
+      <section className="proofCard">
+        <h3>Submit Payment Proof</h3>
+        <label>12-digit UTR / Reference Number</label>
+        <input
+          inputMode="numeric"
+          maxLength="12"
+          value={utr}
+          onChange={(e) => setUtr(e.target.value.replace(/\D/g, ""))}
+          placeholder="Enter 12-digit UTR"
+        />
+        <label className="receiptUpload">
+          <ReceiptText />
+          <span>{receipt || "Upload payment receipt"}</span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setReceipt(e.target.files?.[0]?.name || "")}
+          />
+        </label>
+        <button
+          className="flowConfirm"
+          disabled={utr.length !== 12 || !receipt}
+          onClick={submit}
+        >
+          Submit for Verification
+        </button>
+      </section>
+    </div>
+  );
+}
+function FlowDone({ title, text, action }) {
+  return (
+    <div className="flowDone">
+      <div>
+        <CheckCircle2 />
+      </div>
+      <h1>{title}</h1>
+      <p>{text}</p>
+      <button onClick={action}>Continue</button>
+    </div>
+  );
+}
+function Mine({ mobile, balance, balanceDetails, team, note, logout }) {
   return (
     <div className="page mine">
       <div className="identity">
-        <div className="avatar">CP</div>
+        <ProfileAvatar name="CashbacksPay User" size="large" />
         <div>
           <b>MOBILE: +91 {mobile || "98XXXXXX10"}</b>
-          <button>
-            Invite Code: CP123123 <Copy />
+          <button
+            onClick={() =>
+              copyText("011273", () => note("Invite code copied ✅"))
+            }
+          >
+            Invite Code: 011273 <Copy />
           </button>
         </div>
       </div>
@@ -704,6 +915,23 @@ function Mine({ mobile, balance, balanceDetails, team, logout }) {
       <button className="logout" onClick={logout}>
         <LogOut /> Logout
       </button>
+    </div>
+  );
+}
+function ProfileAvatar({ name, size, index = 0 }) {
+  const colors = ["avatarBlue", "avatarPurple", "avatarGreen", "avatarOrange"],
+    initials = name
+      .split(" ")
+      .map((x) => x[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  return (
+    <div
+      className={`profileAvatar ${size || ""} ${colors[index % colors.length]}`}
+    >
+      <span>{initials}</span>
+      <i />
     </div>
   );
 }
@@ -809,10 +1037,22 @@ function Team({ team, back, note }) {
       <section className="invite teamInvite">
         <div className="sectionHead">
           <h3>Invite & Earn</h3>
-          <b>CP123123</b>
+          <b
+            onClick={() =>
+              copyText("011273", () => note("Invite code copied ✅"))
+            }
+          >
+            011273 <Copy />
+          </b>
         </div>
-        <button onClick={() => note("Invite link copied")}>
-          cashbackspay.app/invite/CP123123 <Copy />
+        <button
+          onClick={() =>
+            copyText("https://cashbackspay.app/invite/011273", () =>
+              note("Invite link copied ✅"),
+            )
+          }
+        >
+          cashbackspay.app/invite/011273 <Copy />
         </button>
       </section>
       <section className="share teamShare">
@@ -931,7 +1171,10 @@ function TeamDetails({ members, back }) {
       <div className="memberList">
         {shown.map((x) => (
           <article>
-            <div className="memberAvatar">{x.mobile.slice(0, 2)}</div>
+            <ProfileAvatar
+              name={x.mobile.slice(0, 2)}
+              index={shown.indexOf(x)}
+            />
             <div className="memberIdentity">
               <b>{x.mobile}</b>
               <span>

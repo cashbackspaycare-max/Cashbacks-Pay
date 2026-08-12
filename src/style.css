@@ -1540,6 +1540,338 @@ nav {
   font-size: 10px;
   color: #1c2439;
 }
+.flowPage {
+  position: fixed;
+  inset: 0;
+  background: #f5f7fb;
+  z-index: 25;
+  overflow: auto;
+  padding-bottom: 24px;
+}
+.flowHint {
+  text-align: center;
+  color: #8490a2;
+  font-size: 11px;
+  margin: 14px;
+}
+.walletList {
+  margin: 0 14px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.walletList > button {
+  width: 100%;
+  height: 76px;
+  border: 0;
+  border-bottom: 1px solid #edf0f5;
+  background: #fff;
+  padding: 0 17px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+.walletList > button.selected {
+  background: #f2f6ff;
+}
+.walletList > button > span {
+  flex: 1;
+  font-weight: 650;
+}
+.walletList > button > i {
+  width: 26px;
+  height: 26px;
+  border: 2px solid #d3d9e4;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #1755df;
+}
+.walletList > button.selected > i {
+  border: 0;
+}
+.walletList > button > i svg {
+  width: 26px;
+  height: 26px;
+}
+.walletLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 6px 13px #142b6524;
+}
+.walletLogo.phonepe {
+  background: linear-gradient(145deg, #6738b7, #392080);
+  font-size: 24px;
+}
+.walletLogo.freecharge {
+  background: linear-gradient(145deg, #ff795b, #e73d26);
+}
+.walletLogo.mobikwik {
+  background: linear-gradient(145deg, #2374d8, #073d9d);
+}
+.walletLogo.paytm {
+  background: linear-gradient(145deg, #11a8e1, #053b93);
+  font-size: 11px;
+}
+.walletLogo.jio {
+  background: linear-gradient(145deg, #f04c50, #b50f21);
+}
+.walletLogo.moneyview {
+  background: linear-gradient(145deg, #194e40, #082c25);
+}
+.walletLogo.bharatpe {
+  background: linear-gradient(145deg, #17aab5, #08707d);
+}
+.walletLogo.paytmbiz {
+  background: linear-gradient(145deg, #163e91, #04a9d7);
+  font-size: 11px;
+}
+.flowConfirm {
+  width: calc(100% - 28px);
+  min-height: 56px;
+  margin: 18px 14px 0;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0f46d2, #286cff);
+  color: #fff;
+  font-weight: 800;
+}
+.flowConfirm:disabled {
+  background: #cdd4e1;
+  color: #8c95a4;
+}
+.countdown {
+  margin: 13px 14px;
+  background: #fff5d9;
+  color: #8b650e;
+  border-radius: 13px;
+  padding: 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+}
+.countdown svg {
+  width: 17px;
+}
+.countdown b {
+  margin-left: auto;
+}
+.payHero {
+  margin: 14px;
+  background: linear-gradient(145deg, #0c39b9, #2769f7);
+  border-radius: 22px;
+  color: #fff;
+  padding: 22px;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+}
+.payHero .walletLogo {
+  border: 3px solid #ffffff88;
+}
+.payHero small {
+  color: #c5d5ff;
+}
+.payHero h1 {
+  font-size: 36px;
+  margin: 3px;
+}
+.payHero span {
+  font-size: 10px;
+}
+.receiverCard,
+.proofCard {
+  margin: 12px 14px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 18px;
+}
+.receiverCard > small {
+  color: #e58118;
+  font-size: 9px;
+  font-weight: 800;
+}
+.receiverCard h3 {
+  font-size: 21px;
+  margin: 9px 0 3px;
+}
+.receiverCard > p {
+  font-size: 10px;
+  color: #8992a1;
+  margin-top: 0;
+}
+.safeNote {
+  background: #eef8f4;
+  color: #34715e;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  gap: 7px;
+  font-size: 9px;
+}
+.safeNote svg {
+  width: 17px;
+}
+.payAppButton {
+  width: 100%;
+  margin-top: 15px;
+  border: 0;
+  border-radius: 15px;
+  padding: 10px;
+  background: #1454dc;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 800;
+}
+.payAppButton .walletLogo {
+  width: 35px;
+  height: 35px;
+  border-radius: 10px;
+  font-size: 9px;
+}
+.proofCard h3 {
+  margin-top: 0;
+}
+.proofCard > label:not(.receiptUpload) {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  margin: 12px 0 7px;
+}
+.proofCard > input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #dfe5ef;
+  border-radius: 13px;
+  padding: 0 13px;
+  outline-color: #1755df;
+}
+.receiptUpload {
+  min-height: 70px;
+  border: 1.5px dashed #9faec6;
+  border-radius: 14px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #617087;
+  font-size: 11px;
+}
+.receiptUpload svg {
+  width: 22px;
+}
+.receiptUpload input {
+  display: none;
+}
+.proofCard .flowConfirm {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+.flowDone {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #fff;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  justify-items: center;
+  padding: 25px;
+}
+.flowDone > div {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #e7f8f1;
+  color: #159466;
+}
+.flowDone svg {
+  width: 46px;
+  height: 46px;
+}
+.flowDone h1 {
+  margin-bottom: 7px;
+}
+.flowDone p {
+  color: #7e8797;
+  max-width: 330px;
+  line-height: 1.6;
+}
+.flowDone button {
+  width: 240px;
+  border: 0;
+  border-radius: 15px;
+  padding: 14px;
+  background: #1655df;
+  color: #fff;
+  font-weight: 800;
+  margin-top: 15px;
+}
+.profileAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  position: relative;
+  box-shadow: 0 6px 14px #1d316629;
+}
+.profileAvatar.large {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  font-size: 20px;
+  border: 4px solid #fff;
+}
+.profileAvatar i {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #23b178;
+  border: 2px solid #fff;
+}
+.avatarBlue {
+  background: linear-gradient(145deg, #276df5, #123bb2);
+}
+.avatarPurple {
+  background: linear-gradient(145deg, #9b60ec, #5330a3);
+}
+.avatarGreen {
+  background: linear-gradient(145deg, #36b99a, #087762);
+}
+.avatarOrange {
+  background: linear-gradient(145deg, #ff9b4a, #d94b24);
+}
+.teamInvite .sectionHead > b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.teamInvite .sectionHead > b svg {
+  width: 14px;
+}
 nav button {
   min-width: 68px;
   min-height: 62px;
@@ -1684,6 +2016,13 @@ nav .active {
     border-radius: 26px;
   }
   .teamDetailPage {
+    max-width: 480px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 26px;
+  }
+  .flowPage,
+  .flowDone {
     max-width: 480px;
     left: 50%;
     transform: translateX(-50%);
