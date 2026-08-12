@@ -23,6 +23,15 @@ import {
   PlusCircle,
   TrendingUp,
   ReceiptText,
+  Zap,
+  Smartphone,
+  BarChart3,
+  CalendarDays,
+  Search,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import "./style.css";
 const seed = [101, 110, 120, 125, 139, 140, 143].map((x, i) => ({
@@ -41,6 +50,7 @@ const cash = (n) =>
   tabs = ["Unfinished", "Bank lock", "Locked", "Success", "Fail"];
 function App() {
   const [login, setLogin] = useState(false),
+    [authScreen, setAuthScreen] = useState("onboarding"),
     [admin, setAdmin] = useState(false),
     [tab, setTab] = useState("home"),
     [orders, setOrders] = useState(seed),
@@ -49,6 +59,32 @@ function App() {
     [recordType, setRecordType] = useState(null),
     [toast, setToast] = useState(""),
     [balance, setBalance] = useState(1508.72),
+    [ledger, setLedger] = useState([
+      {
+        id: "TXN-2087639",
+        type: "Platform Reward",
+        amount: 15,
+        reason: "Activity reward",
+        time: "13 Aug 2026, 02:08 AM",
+        balance: 1508.72,
+      },
+      {
+        id: "TXN-2087346",
+        type: "Task Reward",
+        amount: 6.09,
+        reason: "Buy task CP-10598",
+        time: "13 Aug 2026, 12:53 AM",
+        balance: 1493.72,
+      },
+      {
+        id: "TXN-2086248",
+        type: "Level 1 Commission",
+        amount: 4.64,
+        reason: "Team task commission 0.3%",
+        time: "12 Aug 2026, 11:46 PM",
+        balance: 1487.63,
+      },
+    ]),
     [team, setTeam] = useState({ earnings: 81.01, l1: 0, l2: 0, l3: 0 }),
     [mobile, setMobile] = useState("");
   const note = (x) => {
@@ -84,25 +120,39 @@ function App() {
         l3: t.l3 + c,
       }));
       setBalance((v) => v + r.reward);
+      setLedger((l) => [
+        {
+          id: `TXN-${Date.now()}`,
+          type: "Task Reward",
+          amount: r.reward,
+          reason: `Successful task ${r.id}`,
+          time: new Date().toLocaleString("en-IN"),
+          balance: balance + r.reward,
+        },
+        ...l,
+      ]);
       note("Task complete • Commission credited");
     };
+  const enter = (a) => {
+    setAdmin(a);
+    setLogin(true);
+    setTab(a ? "admin" : "home");
+  };
   if (!login)
     return (
-      <Login
+      <AuthFlow
+        screen={authScreen}
+        setScreen={setAuthScreen}
         mobile={mobile}
         setMobile={setMobile}
-        enter={(a) => {
-          setAdmin(a);
-          setLogin(true);
-          setTab(a ? "admin" : "home");
-        }}
+        enter={enter}
       />
     );
   return (
     <div className="app">
       <main>
         {tab === "home" && (
-          <Dashboard more={() => setRecordType("Buy CP record")} />
+          <Dashboard more={() => setRecordType("Daily Details")} />
         )}{" "}
         {tab === "buy" && (
           <Buy
@@ -120,6 +170,7 @@ function App() {
           <Mine
             mobile={mobile}
             balance={balance}
+            balanceDetails={() => setRecordType("Balance Details")}
             team={() => setTab("team")}
             logout={() => setLogin(false)}
           />
@@ -131,42 +182,85 @@ function App() {
           <Admin
             records={records}
             complete={complete}
+            reward={() => {
+              const amount = 100;
+              setBalance((v) => v + amount);
+              setLedger((l) => [
+                {
+                  id: `PR-${Date.now()}`,
+                  type: "Platform Reward",
+                  amount,
+                  reason: "Manual reward by Admin",
+                  time: new Date().toLocaleString("en-IN"),
+                  balance: balance + amount,
+                },
+                ...l,
+              ]);
+              note("₹100 platform reward added");
+            }}
             logout={() => setLogin(false)}
           />
         )}{" "}
-        {recordType && (
-          <Records
-            title={recordType}
-            data={records}
+        {recordType === "Daily Details" && (
+          <DailyDetails
+            ledger={ledger}
+            records={records}
             back={() => setRecordType(null)}
           />
         )}
+        {recordType === "Balance Details" && (
+          <BalanceDetails
+            ledger={ledger}
+            balance={balance}
+            back={() => setRecordType(null)}
+          />
+        )}
+        {recordType &&
+          !["Daily Details", "Balance Details"].includes(recordType) && (
+            <Records
+              title={recordType}
+              data={records}
+              back={() => setRecordType(null)}
+            />
+          )}
       </main>
-      {!['team', 'admin'].includes(tab) && (
+      {!["team", "admin"].includes(tab) && (
         <nav>
           <Nav
             icon={Home}
             text="Home"
             active={tab === "home" && !recordType}
-            go={() => { setRecordType(null); setTab("home"); }}
+            go={() => {
+              setRecordType(null);
+              setTab("home");
+            }}
           />
           <Nav
             coin
             text="Buy CP"
             active={tab === "buy" || recordType === "Buy CP record"}
-            go={() => { setRecordType(null); setTab("buy"); }}
+            go={() => {
+              setRecordType(null);
+              setTab("buy");
+            }}
           />
           <Nav
             icon={WalletCards}
             text="Sell CP"
             active={tab === "sell" || recordType === "Sell CP record"}
-            go={() => { setRecordType(null); setTab("sell"); }}
+            go={() => {
+              setRecordType(null);
+              setTab("sell");
+            }}
           />
           <Nav
             icon={UserRound}
             text="Mine"
             active={tab === "mine" && !recordType}
-            go={() => { setRecordType(null); setTab("mine"); }}
+            go={() => {
+              setRecordType(null);
+              setTab("mine");
+            }}
           />
         </nav>
       )}
@@ -179,7 +273,216 @@ function App() {
     </div>
   );
 }
-function Login({ mobile, setMobile, enter }) {
+function AuthFlow({ screen, setScreen, mobile, setMobile, enter }) {
+  const [slide, setSlide] = useState(0),
+    slides = [
+      {
+        icon: Zap,
+        title: "Fast Payments",
+        text: "Complete tasks quickly and securely",
+      },
+      {
+        icon: ShieldCheck,
+        title: "Secure Platform",
+        text: "Every task and transaction stays protected",
+      },
+      {
+        icon: Smartphone,
+        title: "Smart Wallet",
+        text: "Manage tasks, rewards and earnings in one place",
+      },
+    ];
+  if (screen === "onboarding") {
+    const s = slides[slide],
+      Icon = s.icon;
+    return (
+      <div className="onboarding">
+        <div className="onboardBrand">
+          <i>CP</i>
+          <span>CashbacksPay</span>
+        </div>
+        <div className="onboardCopy">
+          <h1>{s.title}</h1>
+          <p>{s.text}</p>
+        </div>
+        <div className="onboardArt">
+          <div className="artHalo" />
+          <div className="artPhone">
+            <Icon />
+          </div>
+          <div className="artChip one">₹</div>
+          <div className="artChip two">
+            <ShieldCheck />
+          </div>
+        </div>
+        <div className="dots">
+          {slides.map((_, i) => (
+            <i className={slide === i ? "on" : ""} />
+          ))}
+        </div>
+        {slide < 2 ? (
+          <button className="onboardNext" onClick={() => setSlide(slide + 1)}>
+            Next
+          </button>
+        ) : (
+          <div className="authChoice">
+            <button onClick={() => setScreen("register")}>Register</button>
+            <button onClick={() => setScreen("login")}>Login</button>
+          </div>
+        )}
+        <button
+          className="skip"
+          onClick={() => {
+            setSlide(2);
+          }}
+        >
+          Skip
+        </button>
+      </div>
+    );
+  }
+  if (screen === "register")
+    return (
+      <Register
+        back={() => setScreen("onboarding")}
+        login={() => setScreen("login")}
+        setMobile={setMobile}
+      />
+    );
+  return (
+    <Login
+      mobile={mobile}
+      setMobile={setMobile}
+      enter={enter}
+      register={() => setScreen("register")}
+    />
+  );
+}
+function Register({ back, login, setMobile }) {
+  const [f, setF] = useState({
+      mobile: "",
+      pass: "",
+      confirm: "",
+      pin: "",
+      pin2: "",
+      invite: "",
+    }),
+    [show, setShow] = useState(false),
+    [error, setError] = useState("");
+  const change = (k, v) => setF({ ...f, [k]: v }),
+    submit = () => {
+      if (f.mobile.length !== 10)
+        return setError("Enter a valid 10-digit mobile number");
+      if (f.pass.length < 6)
+        return setError("Login password must contain at least 6 characters");
+      if (f.pass !== f.confirm) return setError("Login passwords do not match");
+      if (!/^\d{6}$/.test(f.pin))
+        return setError("Fund PIN must contain exactly 6 digits");
+      if (f.pin !== f.pin2) return setError("Fund PINs do not match");
+      setMobile(f.mobile);
+      login();
+    };
+  return (
+    <div className="registerPage">
+      <header>
+        <button onClick={back}>
+          <ChevronLeft />
+        </button>
+        <div>
+          <small>CREATE ACCOUNT</small>
+          <h1>Register</h1>
+        </div>
+      </header>
+      <p>Join CashbacksPay and start completing verified tasks.</p>
+      <FormField
+        icon={Smartphone}
+        placeholder="10-digit mobile number"
+        value={f.mobile}
+        max={10}
+        change={(v) => change("mobile", v.replace(/\D/g, ""))}
+      />
+      <FormField
+        icon={LockKeyhole}
+        type={show ? "text" : "password"}
+        placeholder="Create login password"
+        value={f.pass}
+        change={(v) => change("pass", v)}
+        action={() => setShow(!show)}
+        actionIcon={show ? EyeOff : Eye}
+      />
+      <FormField
+        icon={LockKeyhole}
+        type={show ? "text" : "password"}
+        placeholder="Confirm login password"
+        value={f.confirm}
+        change={(v) => change("confirm", v)}
+      />
+      <FormField
+        icon={ShieldCheck}
+        type="password"
+        placeholder="Create 6-digit Fund PIN"
+        value={f.pin}
+        max={6}
+        change={(v) => change("pin", v.replace(/\D/g, ""))}
+      />
+      <FormField
+        icon={ShieldCheck}
+        type="password"
+        placeholder="Confirm Fund PIN"
+        value={f.pin2}
+        max={6}
+        change={(v) => change("pin2", v.replace(/\D/g, ""))}
+      />
+      <FormField
+        icon={UsersRound}
+        placeholder="Invitation code (optional)"
+        value={f.invite}
+        max={8}
+        change={(v) => change("invite", v.toUpperCase())}
+      />
+      <label className="terms">
+        <input type="checkbox" defaultChecked /> I agree to the Terms and
+        Privacy Policy
+      </label>
+      {error && <div className="formError">{error}</div>}
+      <button className="primary" onClick={submit}>
+        Create Account
+      </button>
+      <button className="link" onClick={login}>
+        Already registered? Login
+      </button>
+    </div>
+  );
+}
+function FormField({
+  icon: Icon,
+  actionIcon: Action,
+  action,
+  type = "text",
+  placeholder,
+  value,
+  change,
+  max,
+}) {
+  return (
+    <div className="regField">
+      <Icon />
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        maxLength={max}
+        onChange={(e) => change(e.target.value)}
+      />
+      {Action && (
+        <button onClick={action}>
+          <Action />
+        </button>
+      )}
+    </div>
+  );
+}
+function Login({ mobile, setMobile, enter, register }) {
   return (
     <div className="login">
       <div className="loginGlow">
@@ -212,7 +515,9 @@ function Login({ mobile, setMobile, enter }) {
         >
           Secure Login
         </button>
-        <button className="link">Create new account</button>
+        <button className="link" onClick={register}>
+          Create new account
+        </button>
         <div className="demo">Admin: 9999999999 · User: any number</div>
       </section>
     </div>
@@ -363,7 +668,7 @@ function Sell({ records }) {
     </div>
   );
 }
-function Mine({ mobile, balance, team, logout }) {
+function Mine({ mobile, balance, balanceDetails, team, logout }) {
   return (
     <div className="page mine">
       <div className="identity">
@@ -375,7 +680,7 @@ function Mine({ mobile, balance, team, logout }) {
           </button>
         </div>
       </div>
-      <section className="balance">
+      <section className="balance" onClick={balanceDetails} role="button">
         <span>Current Balance</span>
         <b>{cash(balance)}</b>
         <ChevronRight />
@@ -517,7 +822,7 @@ function Records({ title, data, back }) {
     </div>
   );
 }
-function Admin({ records, complete, logout }) {
+function Admin({ records, complete, reward, logout }) {
   return (
     <div className="subpage admin">
       <div className="adminTitle">
@@ -538,6 +843,9 @@ function Admin({ records, complete, logout }) {
           Completed<b>{records.filter((x) => x.status === "SUCCESS").length}</b>
         </span>
       </div>
+      <button className="platformReward" onClick={reward}>
+        <Gift /> Add ₹100 Platform Reward
+      </button>
       <h3>Task Queue</h3>
       {records.length ? (
         records.map((x) => (
@@ -562,6 +870,136 @@ function Admin({ records, complete, logout }) {
         Successful task automatically distributes 0.3%, 0.2% and 0.1% referral
         commission. No separate commission approval.
       </p>
+    </div>
+  );
+}
+function DailyDetails({ ledger, records, back }) {
+  const credits = ledger.filter((x) => x.amount > 0),
+    total = credits.reduce((a, x) => a + x.amount, 0),
+    successful = records.filter((x) => x.status === "SUCCESS");
+  return (
+    <div className="overlayPage detailPage">
+      <Header title="Daily Details" back={back} />
+      <div className="datePill">
+        <CalendarDays /> 13 August 2026
+      </div>
+      <section className="incomeHero">
+        <small>TODAY'S TOTAL INCOME</small>
+        <b>{cash(total)}</b>
+        <span>Updated from your activity ledger</span>
+      </section>
+      <h3>Purchase Data</h3>
+      <section className="metricGrid">
+        <Metric t="Tasks" v={successful.length} />
+        <Metric
+          t="Amount"
+          v={cash(successful.reduce((a, x) => a + x.amount, 0))}
+        />
+        <Metric
+          t="Task Rewards"
+          v={cash(
+            ledger
+              .filter((x) => x.type === "Task Reward")
+              .reduce((a, x) => a + x.amount, 0),
+          )}
+        />
+        <Metric
+          t="Team Rebates"
+          v={cash(
+            ledger
+              .filter((x) => x.type.includes("Commission"))
+              .reduce((a, x) => a + x.amount, 0),
+          )}
+        />
+      </section>
+      <h3>Data for Sale</h3>
+      <section className="metricGrid">
+        <Metric t="Successful Sales" v="0" />
+        <Metric t="Sell Amount" v="₹0.00" />
+      </section>
+      <h3>Platform Rewards</h3>
+      <section className="rewardSummary">
+        <Gift />
+        <div>
+          <b>
+            {cash(
+              ledger
+                .filter((x) => x.type === "Platform Reward")
+                .reduce((a, x) => a + x.amount, 0),
+            )}
+          </b>
+          <span>Activity, bonus and manual admin rewards</span>
+        </div>
+      </section>
+    </div>
+  );
+}
+function Metric({ t, v }) {
+  return (
+    <div>
+      <span>{t}</span>
+      <b>{v}</b>
+    </div>
+  );
+}
+function BalanceDetails({ ledger, balance, back }) {
+  const [q, setQ] = useState(""),
+    [kind, setKind] = useState("All"),
+    shown = ledger.filter(
+      (x) =>
+        (x.id + x.type + x.reason).toLowerCase().includes(q.toLowerCase()) &&
+        (kind === "All" || (kind === "Credit" ? x.amount > 0 : x.amount < 0)),
+    );
+  return (
+    <div className="overlayPage balancePage">
+      <Header title="Balance Details" back={back} />
+      <section className="ledgerBalance">
+        <small>AVAILABLE BALANCE</small>
+        <b>{cash(balance)}</b>
+      </section>
+      <div className="ledgerTools">
+        <div>
+          <Search />
+          <input
+            placeholder="Search ID, task or reason"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        <button>
+          <CalendarDays />
+        </button>
+      </div>
+      <div className="ledgerFilters">
+        {["All", "Credit", "Debit"].map((x) => (
+          <button className={kind === x ? "on" : ""} onClick={() => setKind(x)}>
+            {x}
+          </button>
+        ))}
+      </div>
+      <div className="ledgerList">
+        {shown.map((x) => (
+          <article>
+            <div className={x.amount >= 0 ? "creditIcon" : "debitIcon"}>
+              {x.amount >= 0 ? <ArrowDownCircle /> : <ArrowUpCircle />}
+            </div>
+            <div>
+              <b>{x.type}</b>
+              <span>{x.reason}</span>
+              <small>
+                {x.id} · {x.time}
+              </small>
+            </div>
+            <div>
+              <strong className={x.amount >= 0 ? "creditText" : "debitText"}>
+                {x.amount >= 0 ? "+" : "-"}
+                {cash(Math.abs(x.amount))}
+              </strong>
+              <small>Bal. {cash(x.balance)}</small>
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

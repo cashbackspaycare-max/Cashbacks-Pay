@@ -10,7 +10,8 @@ body {
 }
 .app,
 .login {
-  max-width: 480px;
+  width: 100%;
+  max-width: none;
   min-height: 100vh;
   margin: auto;
   background: #f4f6fb;
@@ -516,7 +517,7 @@ main {
   bottom: 96px;
   left: 50%;
   width: 100%;
-  max-width: 480px;
+  max-width: none;
   margin: 0;
   transform: translateX(-50%);
   background: #f5f7fb;
@@ -756,7 +757,7 @@ nav {
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 20px);
-  max-width: 460px;
+  max-width: none;
   height: 78px;
   background: #fff;
   display: flex;
@@ -766,6 +767,433 @@ nav {
   border: 1px solid #e3e8f2;
   border-radius: 22px;
   box-shadow: 0 10px 30px #172b5b2b;
+}
+
+.onboarding {
+  width: 100%;
+  min-height: 100dvh;
+  background: #fff;
+  padding: 26px 24px max(24px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.onboardBrand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #174fd8;
+  font-weight: 800;
+}
+.onboardBrand i {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: #1654df;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-style: normal;
+}
+.onboardCopy {
+  text-align: center;
+  margin-top: 48px;
+}
+.onboardCopy h1 {
+  font-size: 30px;
+  margin: 0 0 12px;
+}
+.onboardCopy p {
+  margin: 0;
+  color: #858d9c;
+  font-size: 14px;
+}
+.onboardArt {
+  height: 42vh;
+  min-height: 300px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.artHalo {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #eaf0ff, #f8faff 70%);
+}
+.artPhone {
+  z-index: 1;
+  width: 145px;
+  height: 190px;
+  border-radius: 34px;
+  background: linear-gradient(145deg, #4c80ff, #113cc2);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 30px 50px #174fd837;
+  transform: rotate(7deg);
+  border: 10px solid #dce6ff;
+}
+.artPhone svg {
+  width: 70px;
+  height: 70px;
+  color: #fff;
+}
+.artChip {
+  position: absolute;
+  z-index: 2;
+  width: 54px;
+  height: 54px;
+  border-radius: 17px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 12px 25px #152d6d28;
+  color: #ff8319;
+  font-weight: 800;
+}
+.artChip.one {
+  left: 14%;
+  top: 52%;
+}
+.artChip.two {
+  right: 14%;
+  top: 34%;
+  color: #1757df;
+}
+.artChip svg {
+  width: 25px;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: auto 0 25px;
+}
+.dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 8px;
+  background: #dce1eb;
+}
+.dots .on {
+  width: 25px;
+  background: #1755df;
+}
+.onboardNext,
+.authChoice button {
+  min-height: 58px;
+  border-radius: 17px;
+  font-weight: 800;
+  font-size: 16px;
+}
+.onboardNext {
+  border: 0;
+  background: linear-gradient(135deg, #1247d5, #246aff);
+  color: #fff;
+}
+.authChoice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.authChoice button {
+  border: 1.5px solid #1655df;
+  background: #fff;
+  color: #1655df;
+}
+.authChoice button:last-child {
+  background: #1655df;
+  color: #fff;
+}
+.skip {
+  position: absolute;
+  right: 24px;
+  top: 28px;
+  border: 0;
+  background: none;
+  color: #7e8798;
+}
+.registerPage {
+  width: 100%;
+  min-height: 100dvh;
+  background: #f7f8fc;
+  padding: 24px 18px;
+}
+.registerPage header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+.registerPage header button {
+  border: 0;
+  background: #fff;
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+}
+.registerPage header small {
+  color: #1755df;
+  font-weight: 800;
+}
+.registerPage header h1 {
+  margin: 2px 0;
+}
+.registerPage > p {
+  color: #828b9b;
+  margin-bottom: 24px;
+}
+.regField {
+  height: 62px;
+  margin: 12px 0;
+  padding: 0 15px;
+  background: #fff;
+  border: 1px solid #e3e7ef;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.regField > svg {
+  width: 20px;
+  color: #2458d4;
+}
+.regField input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 14px;
+  min-width: 0;
+}
+.regField button {
+  border: 0;
+  background: none;
+}
+.regField button svg {
+  width: 19px;
+}
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #737d8e;
+  font-size: 11px;
+  margin: 16px 3px;
+}
+.formError {
+  padding: 11px;
+  border-radius: 10px;
+  background: #fff0f0;
+  color: #c84444;
+  font-size: 11px;
+}
+.detailPage,
+.balancePage {
+  padding-bottom: 18px;
+}
+.datePill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #657087;
+  font-size: 11px;
+  margin: 14px;
+}
+.datePill svg {
+  width: 17px;
+}
+.incomeHero {
+  margin: 14px;
+  padding: 22px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #101b3b, #205dde);
+  color: #fff;
+  display: grid;
+  gap: 7px;
+}
+.incomeHero small {
+  color: #aebfe8;
+}
+.incomeHero b {
+  font-size: 32px;
+}
+.incomeHero span {
+  font-size: 10px;
+  color: #c7d4f4;
+}
+.detailPage > h3 {
+  margin: 22px 16px 10px;
+}
+.metricGrid {
+  margin: 0 14px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.metricGrid div {
+  display: grid;
+  gap: 7px;
+  padding: 17px;
+  border: 1px solid #f0f2f6;
+}
+.metricGrid span {
+  font-size: 10px;
+  color: #8b93a2;
+}
+.metricGrid b {
+  font-size: 17px;
+}
+.rewardSummary {
+  margin: 0 14px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.rewardSummary > svg {
+  width: 43px;
+  height: 43px;
+  padding: 10px;
+  border-radius: 13px;
+  background: #edf3ff;
+  color: #1655df;
+}
+.rewardSummary div {
+  display: grid;
+  gap: 5px;
+}
+.rewardSummary span {
+  font-size: 10px;
+  color: #858e9e;
+}
+.ledgerBalance {
+  margin: 14px;
+  background: linear-gradient(135deg, #0d42ca, #3173ff);
+  border-radius: 20px;
+  padding: 20px;
+  color: #fff;
+  display: grid;
+  gap: 7px;
+}
+.ledgerBalance b {
+  font-size: 30px;
+}
+.ledgerTools {
+  display: flex;
+  gap: 9px;
+  margin: 14px;
+}
+.ledgerTools > div {
+  flex: 1;
+  height: 48px;
+  background: #fff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  gap: 8px;
+}
+.ledgerTools svg {
+  width: 18px;
+  color: #6e788b;
+}
+.ledgerTools input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+}
+.ledgerTools > button {
+  width: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #1655df;
+  color: #fff;
+}
+.ledgerFilters {
+  display: flex;
+  gap: 8px;
+  margin: 0 14px 12px;
+}
+.ledgerFilters button {
+  border: 0;
+  border-radius: 20px;
+  padding: 8px 18px;
+  background: #e9edf5;
+  color: #727b8b;
+}
+.ledgerFilters .on {
+  background: #1655df;
+  color: #fff;
+}
+.ledgerList {
+  padding: 0 14px;
+}
+.ledgerList article {
+  background: #fff;
+  border-radius: 17px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+.ledgerList article > div:nth-child(2),
+.ledgerList article > div:last-child {
+  display: grid;
+  gap: 5px;
+}
+.ledgerList article > div:last-child {
+  text-align: right;
+}
+.ledgerList span,
+.ledgerList small {
+  color: #8a92a0;
+  font-size: 9px;
+}
+.creditIcon,
+.debitIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+}
+.creditIcon {
+  background: #e5f8f0;
+  color: #149163;
+}
+.debitIcon {
+  background: #ffeded;
+  color: #d84c4c;
+}
+.creditText {
+  color: #129562;
+}
+.debitText {
+  color: #d84c4c;
+}
+.platformReward {
+  width: 100%;
+  border: 0;
+  border-radius: 13px;
+  padding: 13px;
+  background: #eef3ff;
+  color: #1655df;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-bottom: 18px;
 }
 nav button {
   min-width: 68px;
@@ -889,21 +1317,34 @@ nav .active {
   }
   .app,
   .login {
+    max-width: 480px;
     min-height: calc(100vh - 40px);
     border-radius: 26px;
     overflow: hidden;
   }
   nav {
+    max-width: 460px;
     bottom: 28px;
   }
   .subpage,
   .overlayPage {
+    max-width: 480px;
     top: 20px;
     bottom: 116px;
+  }
+  .onboarding,
+  .registerPage {
+    max-width: 480px;
+    margin: auto;
+    border-radius: 26px;
   }
 }
 
 @supports (padding: max(0px)) {
-  .app { padding-bottom: max(98px, calc(88px + env(safe-area-inset-bottom))); }
-  nav { bottom: max(10px, env(safe-area-inset-bottom)); }
+  .app {
+    padding-bottom: max(98px, calc(88px + env(safe-area-inset-bottom)));
+  }
+  nav {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
 }
