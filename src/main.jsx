@@ -47,7 +47,7 @@ const cash = (n) =>
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }),
-  tabs = ["Unfinished", "Bank lock", "Locked", "Success", "Fail"];
+  tabs = ["Unfinished", "Success", "Cancelled"];
 const copyText = (value, done) => {
   if (navigator.clipboard?.writeText)
     navigator.clipboard.writeText(value).then(done).catch(done);
@@ -100,7 +100,7 @@ function App() {
       setRecords([
         {
           ...o,
-          status: "UNFINISHED",
+          status: o.status || "UNFINISHED",
           time: new Date().toLocaleString("en-IN"),
         },
         ...records,
@@ -124,19 +124,35 @@ function App() {
         l2: t.l2 + b,
         l3: t.l3 + c,
       }));
-      setBalance((v) => v + r.reward);
+      const credit = r.amount + r.reward;
+      setBalance((v) => v + credit);
       setLedger((l) => [
         {
           id: `TXN-${Date.now()}`,
           type: "Task Reward",
-          amount: r.reward,
-          reason: `Successful task ${r.id}`,
+          amount: credit,
+          reason: `Successful Buy CP order ${r.id} (amount + reward)`,
           time: new Date().toLocaleString("en-IN"),
-          balance: balance + r.reward,
+          balance: balance + credit,
         },
         ...l,
       ]);
-      note("Task complete • Commission credited");
+      note("Order accepted • Balance and commission credited");
+    },
+    reject = (id) => {
+      setRecords(
+        records.map((x) =>
+          x.id === id
+            ? {
+                ...x,
+                status: "CANCELLED",
+                cancelledBy: "Admin",
+                cancelReason: "Payment verification rejected",
+              }
+            : x,
+        ),
+      );
+      note("Order moved to Cancelled");
     };
   const enter = (a) => {
     setAdmin(a);
@@ -188,6 +204,7 @@ function App() {
           <Admin
             records={records}
             complete={complete}
+            reject={reject}
             reward={() => {
               const amount = 100;
               setBalance((v) => v + amount);
@@ -632,6 +649,16 @@ function Buy({ orders, receive, level, setLevel, records }) {
       if (utr.length !== 12 || !receipt) return;
       receive({ ...order, wallet: wallet[0], utr, receipt });
       setPhase("done");
+    },
+    cancelOrder = (reason) => {
+      receive({
+        ...order,
+        wallet: wallet?.[0] || "Not selected",
+        status: "CANCELLED",
+        cancelReason: reason,
+        cancelledBy: "User",
+      });
+      setPhase("cancelled");
     };
   if (phase === "wallet")
     return (
@@ -655,6 +682,7 @@ function Buy({ orders, receive, level, setLevel, records }) {
         setReceipt={setReceipt}
         back={() => setPhase("wallet")}
         submit={submit}
+        cancelOrder={cancelOrder}
       />
     );
   if (phase === "done")
@@ -662,6 +690,18 @@ function Buy({ orders, receive, level, setLevel, records }) {
       <FlowDone
         title="Verification Pending"
         text="Your UTR and receipt were submitted for manual verification."
+        action={() => {
+          setPhase("list");
+          setOrder(null);
+        }}
+      />
+    );
+  if (phase === "cancelled")
+    return (
+      <FlowDone
+        cancelled
+        title="Order Cancelled"
+        text="The order was cancelled and moved to your Cancelled records."
         action={() => {
           setPhase("list");
           setOrder(null);
@@ -800,13 +840,13 @@ function PaymentScreen({
   setReceipt,
   back,
   submit,
+  cancelOrder,
 }) {
+  const [cancelling, setCancelling] = useState(false),
+    [reason, setReason] = useState("Bank / wallet issue");
   return (
     <div className="flowPage paymentPage">
       <Header title="Complete Payment" back={back} />
-      <div className="countdown">
-        <Clock3 /> Order reserved for you <b>09:42</b>
-      </div>
       <section className="payHero">
         <WalletLogo wallet={wallet} />
         <small>PAY USING {wallet[0].toUpperCase()}</small>
@@ -859,15 +899,49 @@ function PaymentScreen({
         >
           Submit for Verification
         </button>
+        <button className="cancelOrderBtn" onClick={() => setCancelling(true)}>
+          Cancel Order
+        </button>
       </section>
+      {cancelling && (
+        <div className="cancelSheet">
+          <div>
+            <h3>Cancel this order?</h3>
+            <p>Use this if your bank, wallet or payment has an issue.</p>
+            {[
+              "Bank / wallet issue",
+              "Payment failed",
+              "Receiver details incorrect",
+              "Payment app unavailable",
+              "Other reason",
+            ].map((x) => (
+              <label>
+                <input
+                  type="radio"
+                  name="reason"
+                  checked={reason === x}
+                  onChange={() => setReason(x)}
+                />
+                <span>{x}</span>
+              </label>
+            ))}
+            <div className="cancelActions">
+              <button onClick={() => setCancelling(false)}>Keep Order</button>
+              <button onClick={() => cancelOrder(reason)}>
+                Confirm Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-function FlowDone({ title, text, action }) {
+function FlowDone({ title, text, action, cancelled }) {
   return (
     <div className="flowDone">
-      <div>
-        <CheckCircle2 />
+      <div className={cancelled ? "cancelledDone" : ""}>
+        {cancelled ? <XCircle /> : <CheckCircle2 />}
       </div>
       <h1>{title}</h1>
       <p>{text}</p>
@@ -1213,8 +1287,8 @@ function Records({ title, data, back }) {
         ? "UNFINISHED"
         : filter === "Success"
           ? "SUCCESS"
-          : filter === "Fail"
-            ? "FAILED"
+          : filter === "Cancelled"
+            ? "CANCELLED"
             : filter.toUpperCase(),
     shown = data.filter((x) => x.status === key);
   return (
@@ -1247,7 +1321,7 @@ function Records({ title, data, back }) {
     </div>
   );
 }
-function Admin({ records, complete, reward, logout }) {
+function Admin({ records, complete, reject, reward, logout }) {
   return (
     <div className="subpage admin">
       <div className="adminTitle">
@@ -1282,9 +1356,12 @@ function Admin({ records, complete, reward, logout }) {
             </div>
             <Status s={x.status} />
             {x.status === "UNFINISHED" && (
-              <button onClick={() => complete(x.id)}>
-                Mark task successful
-              </button>
+              <div className="adminVerify">
+                <button onClick={() => reject(x.id)}>Cancel</button>
+                <button onClick={() => complete(x.id)}>
+                  Accept & Credit Balance
+                </button>
+              </div>
             )}
           </article>
         ))

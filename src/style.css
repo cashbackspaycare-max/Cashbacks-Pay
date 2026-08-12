@@ -1664,6 +1664,89 @@ nav {
 .countdown b {
   margin-left: auto;
 }
+.cancelOrderBtn {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 10px;
+  border: 1px solid #e15e5e;
+  border-radius: 14px;
+  background: #fff;
+  color: #d74747;
+  font-weight: 750;
+}
+.cancelSheet {
+  position: fixed;
+  inset: 0;
+  background: #101831aa;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+}
+.cancelSheet > div {
+  width: 100%;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 22px 18px max(22px, env(safe-area-inset-bottom));
+}
+.cancelSheet h3 {
+  margin: 0 0 6px;
+}
+.cancelSheet > div > p {
+  color: #838c9b;
+  font-size: 11px;
+}
+.cancelSheet label {
+  min-height: 47px;
+  border-bottom: 1px solid #edf0f4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.cancelSheet input {
+  accent-color: #1655df;
+}
+.cancelActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.cancelActions button {
+  border: 0;
+  border-radius: 13px;
+  padding: 13px;
+  font-weight: 750;
+}
+.cancelActions button:first-child {
+  background: #eef1f6;
+  color: #4e596c;
+}
+.cancelActions button:last-child {
+  background: #d94646;
+  color: #fff;
+}
+.flowDone .cancelledDone {
+  background: #ffebeb;
+  color: #d94646;
+}
+.adminVerify {
+  grid-column: 1/3;
+  display: grid !important;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+}
+.adminVerify button {
+  grid-column: auto !important;
+}
+.adminVerify button:first-child {
+  background: #fff !important;
+  color: #d84949 !important;
+  border: 1px solid #e59a9a !important;
+}
+.cancelled {
+  color: #d94f4f;
+}
 .payHero {
   margin: 14px;
   background: linear-gradient(145deg, #0c39b9, #2769f7);
